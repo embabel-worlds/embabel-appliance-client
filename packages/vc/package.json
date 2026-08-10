@@ -1,0 +1,25 @@
+{
+  "name": "@embabel/vc",
+  "version": "0.0.1",
+  "description": "Virtual-Cypher semantics: composing queries, reading the schema, parsing view params. No DOM, no transport.",
+  "type": "module",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "npm run build:esm && npm run build:cjs && npm run build:global",
+    "build:esm": "tsc -p tsconfig.build.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json && node -e \"require('fs').writeFileSync('dist/cjs/package.json', JSON.stringify({type:'commonjs'}))\"",
+    "build:global": "esbuild src/index.ts --bundle --format=iife --global-name=EmbabelVc --outfile=dist/global/embabel-vc.js",
+    "test": "node --experimental-transform-types --test test/*.test.ts"
+  },
+  "license": "UNLICENSED"
+}
