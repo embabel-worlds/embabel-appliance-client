@@ -26,6 +26,51 @@ restrained, and restraint is the house style. The console's chat bubble
 pre-wrapping assistant text is not a style difference but a defect: the model
 writes markdown, and the console was painting the source.
 
+## Themes
+
+This package does **not** invent a theming system. The appliance already has one:
+a CSS file per theme under `installation-default/themes/`, a metadata header plus
+a `:root` block of `--sb-*` variables, discovered by `ThemeService`, picked in
+the Vaadin User drawer, and served over HTTP:
+
+| | |
+| --- | --- |
+| `GET /api/v1/themes` | list — name, display name, description, default |
+| `GET /api/v1/themes/{name}.css` | the CSS, `text/css` |
+| `POST /api/v1/themes/{name}/apply` | apply for the acting user |
+
+So the vocabulary is written in terms of `--sb-*`, and the bundled themes —
+midnight, cubicle, corporate, aurora, neon, slate, ember — restyle the console
+and Me exactly as they already restyle the Vaadin UI. **A user picks a theme
+once and all three surfaces follow.**
+
+```html
+<link rel="stylesheet" href="…/embabel-ui/index.css" />
+<link rel="stylesheet" href="/api/v1/themes/midnight.css" />   <!-- after -->
+```
+
+Two layers make that work:
+
+- **`palette.css`** — the `--sb-*` contract with Embabel's own values. The only
+  file in the package where a colour is written down. A theme replaces it.
+- **`tokens.css`** — semantics (`--signal`, `--rule`, `--panel-bg`) resolved
+  *through* `--sb-*`, with **no colour fallbacks**: a fallback would be a second
+  palette, free to disagree and impossible to notice when it did. Load
+  `palette.css` or a theme first; `index.css` does.
+
+Tints are **derived, not declared** — `color-mix(in srgb, var(--signal) 16%,
+transparent)` — so a green theme gets green washes and a green aurora. Six
+hard-coded rgba tints would mean six more variables every theme had to remember,
+and indigo panels on the day one forgot.
+
+Verified by rendering `reference.html` under real bundled themes rather than by
+reading the CSS. Two things a **light** theme (corporate, cubicle) needs:
+
+- set `--sb-accent-contrast` if its accent is pale, or filled buttons render
+  white-on-white;
+- set `data-color-scheme="light"` on the root, or scrollbars and form chrome
+  stay dark.
+
 ## Use
 
 ```js

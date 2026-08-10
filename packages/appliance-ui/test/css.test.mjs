@@ -38,12 +38,51 @@ describe('the shared visual language', () => {
     )
   })
 
-  it('defines every token in tokens.css, not scattered across components', () => {
-    const tokenFile = new Set(
-      [...all['tokens.css'].matchAll(/^\s*(--[a-z0-9-]+)\s*:/gim)].map((m) => m[1]),
+  it('defines tokens only in the two layers meant to define them', () => {
+    const layers = ['palette.css', 'tokens.css']
+    const owned = new Set(
+      layers.flatMap((f) => [...all[f].matchAll(/^\s*(--[a-z0-9-]+)\s*:/gim)].map((m) => m[1])),
     )
-    const strays = [...defined].filter((t) => !tokenFile.has(t))
-    assert.deepEqual(strays, [], 'tokens.css is the palette; a second definition site is a second palette')
+    const strays = [...defined].filter((t) => !owned.has(t))
+    assert.deepEqual(strays, [], 'palette.css holds the theme contract, tokens.css the semantics; nowhere else')
+  })
+
+  /*
+   * THE THEMING CONTRACT.
+   *
+   * The appliance already ships user-selectable themes: a CSS file per theme
+   * under `installation-default/themes/`, discovered by `ThemeService`, served
+   * from `GET /api/v1/themes/{name}.css`, chosen in the Vaadin User drawer. They
+   * define `--sb-*` and nothing else.
+   *
+   * So every semantic token has to resolve THROUGH an `--sb-*` variable, or that
+   * part of the vocabulary is simply deaf to the user's choice — and the surface
+   * ends up half-themed, which is worse than not themed.
+   */
+  it('resolves every semantic colour through the appliance theme contract', () => {
+    const semanticColours = [
+      '--paper', '--card', '--ink', '--mid', '--faint', '--heading', '--rule',
+      '--signal', '--signal-ink', '--on-signal', '--link', '--link-hover',
+      '--lit', '--alert', '--caution', '--unlit',
+    ]
+    const tokens = all['tokens.css']
+    const deaf = semanticColours.filter((name) => {
+      const declaration = tokens.match(new RegExp(`^\\s*${name}\\s*:([^;]+);`, 'm'))
+      return !declaration || !/var\(\s*--sb-/.test(declaration[1])
+    })
+    assert.deepEqual(deaf, [], 'these ignore the user\'s theme; resolve them through an --sb-* variable')
+  })
+
+  it('derives every tint from a token rather than restating a colour', () => {
+    // A tint written as a literal rgba() cannot follow a theme: pick green, and
+    // the panels still glow indigo.
+    const offenders = files
+      .filter((f) => f !== 'palette.css')
+      .flatMap((f) =>
+        [...all[f].matchAll(/rgba?\((\s*\d+\s*,){2}[^)]*\)/g)]
+          .map((m) => `${f}: ${m[0]}`),
+      )
+    assert.deepEqual(offenders, [], 'use color-mix(in srgb, var(--token) N%, transparent)')
   })
 
   /*
@@ -52,16 +91,16 @@ describe('the shared visual language', () => {
    * differently somewhere, and the discipline is gone.
    */
   it('spells the brand colour exactly once', () => {
-    const offenders = files.filter((f) => f !== 'tokens.css' && /#625fff/i.test(all[f]))
-    assert.deepEqual(offenders, [], 'use var(--signal); the hex belongs in tokens.css alone')
+    const offenders = files.filter((f) => f !== 'palette.css' && /#625fff/i.test(all[f]))
+    assert.deepEqual(offenders, [], 'use var(--signal); the hex belongs in palette.css alone')
   })
 
   it('never hard-codes a second accent hue', () => {
     // Greys, black, white and the lamp colours are legitimate outside tokens
     // only as rgba tints; a NEW six-digit hex is a new colour in the system.
-    const allowed = /#(000000|fff|ffffff|04140c)\b/i
+    const allowed = /#(000000|fff|ffffff)\b/i
     const found = files
-      .filter((f) => f !== 'tokens.css')
+      .filter((f) => f !== 'palette.css')
       .flatMap((f) =>
         [...all[f].matchAll(/#[0-9a-f]{3,8}\b/gi)]
           .map((m) => m[0])
@@ -83,7 +122,7 @@ describe('the shared visual language', () => {
     const imports = [...all['index.css'].matchAll(/@import\s+'\.\/([^']+)'/g)].map((m) => m[1])
     assert.deepEqual(
       imports,
-      ['tokens.css', 'ground.css', 'base.css', 'components.css', 'markdown.css'],
+      ['palette.css', 'tokens.css', 'ground.css', 'base.css', 'components.css', 'markdown.css'],
       'components refine base, and everything needs tokens first',
     )
   })

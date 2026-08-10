@@ -17,8 +17,8 @@ body {
   /* Graph paper: two hairline rulings at 44px. Fixed, so the page slides over
      the grid rather than dragging it along — the drawing stays still. */
   background:
-    repeating-linear-gradient(0deg, rgba(230, 230, 230, 0.028) 0 1px, transparent 1px 44px),
-    repeating-linear-gradient(90deg, rgba(230, 230, 230, 0.028) 0 1px, transparent 1px 44px),
+    repeating-linear-gradient(0deg, var(--grid-line) 0 1px, transparent 1px 44px),
+    repeating-linear-gradient(90deg, var(--grid-line) 0 1px, transparent 1px 44px),
     var(--paper);
   background-attachment: fixed;
 }
@@ -35,9 +35,9 @@ body::before {
   z-index: -2;
   pointer-events: none;
   background:
-    radial-gradient(1000px 640px at 22% 12%, rgba(98, 95, 255, 0.34), transparent 62%),
-    radial-gradient(880px 560px at 82% 18%, rgba(62, 207, 142, 0.13), transparent 58%),
-    radial-gradient(1300px 860px at 55% 95%, rgba(98, 95, 255, 0.20), transparent 62%);
+    radial-gradient(1000px 640px at 22% 12%, color-mix(in srgb, var(--signal) 34%, transparent), transparent 62%),
+    radial-gradient(880px 560px at 82% 18%, color-mix(in srgb, var(--lit) 13%, transparent), transparent 58%),
+    radial-gradient(1300px 860px at 55% 95%, color-mix(in srgb, var(--signal) 20%, transparent), transparent 62%);
   animation: embabel-aurora 40s ease-in-out infinite alternate;
   filter: saturate(1.1);
 }
@@ -72,5 +72,5 @@ body::before {
 }
 
 ::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-thumb { background: rgba(230, 230, 230, 0.18); border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--ink) 18%, transparent); border-radius: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }

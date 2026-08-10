@@ -58,7 +58,7 @@
   color: var(--mid);
   padding: 10px 16px;
   border-bottom: 1px solid var(--hairline);
-  background: rgba(0, 0, 0, 0.45);
+  background: var(--panel-head-bg);
 }
 
 .panel-body {
@@ -139,7 +139,7 @@ label.check {
   text-transform: uppercase;
   padding: 5px 11px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--inset-bg);
   border: 1px solid var(--rule);
   color: var(--mid);
 }
@@ -161,9 +161,9 @@ label.check {
 
 /* A lit lamp glows; an unlit one is simply dim. An unverified state must never
    borrow the glow — that is how a console starts lying about what it knows. */
-.pill.ok .dot { background: var(--lit); box-shadow: 0 0 7px rgba(62, 207, 142, 0.6); }
-.pill.error .dot { background: var(--alert); box-shadow: 0 0 7px rgba(248, 113, 113, 0.5); }
-.pill.caution .dot { background: var(--caution); box-shadow: 0 0 7px rgba(220, 170, 55, 0.5); }
+.pill.ok .dot { background: var(--lit); box-shadow: 0 0 7px color-mix(in srgb, var(--lit) 60%, transparent); }
+.pill.error .dot { background: var(--alert); box-shadow: 0 0 7px color-mix(in srgb, var(--alert) 50%, transparent); }
+.pill.caution .dot { background: var(--caution); box-shadow: 0 0 7px color-mix(in srgb, var(--caution) 50%, transparent); }
 
 /* ── Tabs ──────────────────────────────────────────────────────────────── */
 
@@ -225,7 +225,7 @@ label.check {
 .card.is-clickable:hover,
 .card.is-clickable:focus-visible {
   border-color: var(--signal);
-  box-shadow: 0 0 14px rgba(98, 95, 255, 0.3);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--signal) 30%, transparent);
   outline: none;
 }
 
@@ -249,7 +249,7 @@ label.check {
   justify-content: center;
   font-family: var(--mono);
   font-size: 16px;
-  color: var(--signal-ink);
+  color: var(--signal-label);
   text-transform: uppercase;
   background: var(--signal-wash);
   border: 1px solid var(--rule);
@@ -314,7 +314,7 @@ label.check {
   align-self: flex-end;
   white-space: pre-wrap;
   border-color: var(--signal-edge);
-  background: rgba(98, 95, 255, 0.10);
+  background: var(--signal-quiet);
 }
 
 .chat-msg.assistant {
@@ -349,5 +349,5 @@ label.check {
 .dropzone.is-over {
   border-color: var(--signal);
   color: var(--ink);
-  background: rgba(98, 95, 255, 0.08);
+  background: var(--signal-quiet);
 }

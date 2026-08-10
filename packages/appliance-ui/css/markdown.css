@@ -41,7 +41,7 @@
 .md code {
   font-family: var(--mono);
   font-size: 0.88em;
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--code-bg);
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   padding: 0.5px 4px;
@@ -51,7 +51,7 @@
   margin: 0 0 0.7em;
   padding: 9px 11px;
   overflow-x: auto;
-  background: rgba(0, 0, 0, 0.45);
+  background: var(--panel-head-bg);
   border: 1px solid var(--rule);
   border-radius: var(--radius);
 }
@@ -78,13 +78,13 @@
 }
 
 .md a {
-  color: var(--signal-ink);
+  color: var(--link);
   text-decoration: underline;
   text-underline-offset: 2px;
   cursor: pointer;
 }
 
-.md a:hover { color: #fff; }
+.md a:hover { color: var(--link-hover); }
 
 /* A model will emit a table wider than its container sooner or later. It
    scrolls inside itself rather than pushing the page sideways. */
@@ -103,7 +103,7 @@
 }
 
 .md th {
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
   font-weight: 600;
 }
 
