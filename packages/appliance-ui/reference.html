@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Embabel — the shared visual language</title>
+<link rel="stylesheet" href="./css/index.css" />
+<style>
+  /* Reference-page furniture only. Nothing here belongs in the package. */
+  .console { max-width: 1100px; }
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .swatch { border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; }
+  .swatch .chip { height: 46px; }
+  .swatch .label { font-family: var(--mono); font-size: 10.5px; color: var(--faint);
+    padding: 5px 7px; text-transform: uppercase; letter-spacing: 0.08em; }
+</style>
+</head>
+<body>
+<div class="console">
+
+  <header class="masthead">
+    <div class="masthead-row">
+      <div class="brand">
+        <div>
+          <h1>The shared visual language</h1>
+          <p>Everything both doors are built from. Open this after changing the package.</p>
+        </div>
+      </div>
+      <span class="pill ok"><span class="dot"></span>Connected</span>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab is-on">Overview</button>
+    <button class="tab">Components</button>
+    <button class="tab">Markdown</button>
+  </nav>
+
+  <section class="panel">
+    <h2>Palette</h2>
+    <div class="panel-body">
+      <p class="hint">One accent. Green and red are lamps, never decoration.</p>
+      <div class="swatches">
+        <div class="swatch"><div class="chip" style="background:var(--signal)"></div><div class="label">signal</div></div>
+        <div class="swatch"><div class="chip" style="background:var(--lit)"></div><div class="label">lit</div></div>
+        <div class="swatch"><div class="chip" style="background:var(--alert)"></div><div class="label">alert</div></div>
+        <div class="swatch"><div class="chip" style="background:var(--caution)"></div><div class="label">caution</div></div>
+        <div class="swatch"><div class="chip" style="background:var(--unlit)"></div><div class="label">unlit</div></div>
+        <div class="swatch"><div class="chip" style="background:var(--card)"></div><div class="label">card</div></div>
+        <div class="swatch"><div class="chip" style="background:var(--rule)"></div><div class="label">rule</div></div>
+        <div class="swatch"><div class="chip" style="background:var(--ink)"></div><div class="label">ink</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Controls</h2>
+    <div class="panel-body">
+      <div class="row">
+        <label class="field">Appliance<input type="text" value="http://localhost:4342" /></label>
+        <label class="field">User<input type="text" value="alice" /></label>
+        <label class="field">Limit<input type="number" value="25" /></label>
+        <button class="inline-action">Test</button>
+        <button class="primary inline-action">Connect</button>
+        <button disabled class="inline-action">Disabled</button>
+        <span class="status ok inline-status">Reachable</span>
+      </div>
+      <div class="row">
+        <label class="check"><input type="checkbox" checked /> Stream sensor events</label>
+        <span class="status error">Not authenticated</span>
+        <span class="status caution">Using a cloud model</span>
+      </div>
+      <p class="hint">A hint carries <code>--faint</code> and may hold <code>code</code>.</p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Cards</h2>
+    <div class="panel-body">
+      <div class="card is-clickable">
+        <div class="tile">R</div>
+        <div class="body">
+          <div class="name">realm-github <span class="meta">1.4.0</span></div>
+          <div class="desc-line"><span class="text">Issues, pull requests and repository search as tools.</span>
+            <button class="link">more</button></div>
+        </div>
+        <button>Install</button>
+      </div>
+      <div class="card">
+        <div class="tile lg">Q</div>
+        <div class="body">
+          <div class="name">Query Studio</div>
+          <p>The advanced virtual-Cypher surface.</p>
+          <div class="meta">shared component</div>
+        </div>
+      </div>
+      <div class="dropzone">Drop a document here</div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Chat</h2>
+    <div class="panel-body">
+      <div class="chat-scroll" style="min-height:0">
+        <div class="chat-msg user">what did we agree about the renewal?
+Second line, exactly as typed.</div>
+        <div class="chat-msg assistant md">
+          <p>Three things were agreed, per <code>thread/8821</code>:</p>
+          <ul><li>Pricing holds until <strong>March</strong>.</li><li>Support tier moves to gold.</li></ul>
+          <blockquote>We'll confirm in writing next week.</blockquote>
+          <pre><code>MATCH (:Concept {value:'renewal'})-[r:RELEVANT_TO]->(t)
+RETURN t.subject, r.score</code></pre>
+          <table><thead><tr><th>Term</th><th>Value</th></tr></thead>
+            <tbody><tr><td>Tier</td><td>Gold</td></tr></tbody></table>
+        </div>
+        <div class="chat-working">thinking…</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

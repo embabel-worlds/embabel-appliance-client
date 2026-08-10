@@ -1,0 +1,62 @@
+/* Embabel's palette, and the only place it is written down.
+ *
+ * The schematic, drawn in light lines on black. Embabel is dark mode, period
+ * (see embabel.com). Black ground, slate panels, the brand indigo as the ONE
+ * signal colour, green and red reserved for lamps — a status colour that also
+ * decorates is a status colour nobody reads.
+ *
+ * Both doors already carried an identical copy of this block, character for
+ * character, and their COMPONENTS had drifted anyway. One copy now.
+ *
+ * Override any of these after importing to brand a surface. Do not add a
+ * second accent: the discipline is what makes the indigo mean something.
+ */
+
+:root {
+  /* Ground and surfaces */
+  --paper: #000000;
+  --card: #101828;
+
+  /* Ink, in three weights. Body, secondary, and captions/meta. */
+  --ink: #e6e6e6;
+  --mid: #99a1af;
+  --faint: #6a7282;
+
+  /* The hairline every panel, field and card is drawn with. */
+  --rule: #1e2939;
+
+  /* The one signal colour: focus, selection, the live edge. */
+  --signal: #625fff;
+  /* Ink for text and icons sitting ON a signal-tinted ground. */
+  --signal-ink: #c7d2ff;
+
+  /* Lamps. Never decorative. */
+  --lit: #3ecf8e;
+  --alert: #f87171;
+  /* A lamp that is off — dimmer than --faint, so "unknown" reads as unknown. */
+  --unlit: #364153;
+  /* Somewhere else's computer is in the loop. Amber, and it names names. */
+  --caution: #dcaa37;
+
+  --mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Derived tints, so a component never hand-mixes the brand colour. */
+  --signal-wash: rgba(98, 95, 255, 0.16);
+  --signal-edge: rgba(98, 95, 255, 0.45);
+  --signal-glow: 0 0 18px rgba(98, 95, 255, 0.45);
+  --panel-bg: rgba(11, 16, 30, 0.44);
+  --panel-edge: rgba(230, 230, 230, 0.20);
+  --inset-bg: rgba(0, 0, 0, 0.35);
+  --hairline: rgba(230, 230, 230, 0.14);
+  --field-bg: #0b1220;
+
+  /* The mono caption: uppercase, letterspaced. Section headings, meta, status. */
+  --caption-size: 11px;
+  --caption-tracking: 0.14em;
+
+  --radius: 3px;
+  --radius-panel: 4px;
+
+  color-scheme: dark;
+}
