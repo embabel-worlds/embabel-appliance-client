@@ -1,0 +1,2246 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Embabel appliance — virtual-cypher surface",
+    "description": "Generated from the snapshot `OpenApiKgContractTest` guards in the assistant repo. Do not hand-edit: run `npm run spec` after copying a newer snapshot.",
+    "version": "0.0.0"
+  },
+  "paths": {
+    "/api/v1/admin/kg/annotations/dry-run": {
+      "post": {
+        "operationId": "dryRun",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnnotateDryRunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgAnnotationDryRunResponse"
+                }
+              }
+            },
+            "description": "The frozen plan and the diffs it would write"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No authenticated principal and no resolvable username"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "Annotation writes disabled by feature flag"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "Plan rejected, expired, or frozen for another user"
+          }
+        },
+        "summary": "Freeze an annotation plan: validate and select matching nodes, writing nothing",
+        "tags": [
+          "KG Annotations"
+        ]
+      }
+    },
+    "/api/v1/admin/kg/annotations/{planId}/apply": {
+      "post": {
+        "operationId": "apply",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "planId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgAnnotationOutcomeResponse"
+                }
+              }
+            },
+            "description": "The outcome: committed counts and post-images"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No authenticated principal and no resolvable username"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "Annotation writes disabled by feature flag"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "Plan rejected, expired, or frozen for another user"
+          }
+        },
+        "summary": "Apply a frozen annotation plan once, returning committed counts and post-images",
+        "tags": [
+          "KG Annotations"
+        ]
+      }
+    },
+    "/api/v1/admin/kg/annotations/{planId}/undo": {
+      "post": {
+        "operationId": "undo",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "planId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgAnnotationOutcomeResponse"
+                }
+              }
+            },
+            "description": "The outcome: what the undo reverted"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No authenticated principal and no resolvable username"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "Annotation writes disabled by feature flag"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "Plan rejected, expired, or frozen for another user"
+          }
+        },
+        "summary": "Conditionally undo an applied plan; a later edit wins and reports as a conflict",
+        "tags": [
+          "KG Annotations"
+        ]
+      }
+    },
+    "/api/v1/admin/kg/ask": {
+      "post": {
+        "operationId": "ask_1",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KgAskRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgQueryResult"
+                }
+              }
+            },
+            "description": "The answer, with the cypher that produced it and what it cost"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No authenticated principal and no resolvable username"
+          }
+        },
+        "summary": "Answer a natural-language question by generating and executing scoped Cypher",
+        "tags": [
+          "Virtual Cypher"
+        ]
+      }
+    },
+    "/api/v1/admin/kg/decorate": {
+      "get": {
+        "operationId": "list_5",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgDecoratorListResponse"
+                }
+              }
+            },
+            "description": "The registered decorators"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No authenticated principal"
+          }
+        },
+        "summary": "List the registered node decorators and their tick, batch and staleness settings",
+        "tags": [
+          "KG Decoration"
+        ]
+      }
+    },
+    "/api/v1/admin/kg/decorate/{name}": {
+      "post": {
+        "operationId": "runNow",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgDecorationReport"
+                }
+              }
+            },
+            "description": "What the tick did"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No authenticated principal"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgDecorationReport"
+                }
+              }
+            },
+            "description": "Unknown decorator"
+          }
+        },
+        "summary": "Run one tick of a decorator now over its stale candidates",
+        "tags": [
+          "KG Decoration"
+        ]
+      }
+    },
+    "/api/v1/admin/kg/decorate/{name}/{nodeId}": {
+      "post": {
+        "operationId": "runFor",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "nodeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgDecorationReport"
+                }
+              }
+            },
+            "description": "What the forced run did"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No authenticated principal"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgDecorationReport"
+                }
+              }
+            },
+            "description": "Unknown decorator"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgDecorationReport"
+                }
+              }
+            },
+            "description": "Decoration failed"
+          }
+        },
+        "summary": "Force a decorator to run against one specific node, bypassing the staleness check",
+        "tags": [
+          "KG Decoration"
+        ]
+      }
+    },
+    "/api/v1/admin/kg/execute": {
+      "post": {
+        "description": "Three modes: background=true returns a run handle immediately and may park awaiting input; waitSeconds=N watches for that long then returns a run handle; with neither, the call is fully synchronous.",
+        "operationId": "execute",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "background",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "waitSeconds",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KgExecuteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/KgQueryResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/KgBackgroundHandle"
+                    }
+                  ]
+                }
+              }
+            },
+            "description": "A finished result, or a run handle when `background=true`"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No authenticated principal and no resolvable username"
+          }
+        },
+        "summary": "Execute verbatim Cypher through the virtual-cypher engine, synchronously, watched, or in the background",
+        "tags": [
+          "Virtual Cypher"
+        ]
+      }
+    },
+    "/api/v1/admin/kg/generate": {
+      "post": {
+        "operationId": "generate",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KgAskRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgGenerateResponse"
+                }
+              }
+            },
+            "description": "The generated cypher, its verdict, and what the engine will do"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No authenticated principal and no resolvable username"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "Generation failed"
+          }
+        },
+        "summary": "Generate Cypher and an execution explanation for a question, without running it",
+        "tags": [
+          "Virtual Cypher"
+        ]
+      }
+    },
+    "/api/v1/admin/kg/kill/{runId}": {
+      "post": {
+        "operationId": "kill",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "runId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgKillResponse"
+                }
+              }
+            },
+            "description": "Whether the kill landed"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No authenticated principal and no resolvable username"
+          }
+        },
+        "summary": "Cancel an in-flight run by id (owner-guarded)",
+        "tags": [
+          "Virtual Cypher"
+        ]
+      }
+    },
+    "/api/v1/admin/kg/reproject": {
+      "post": {
+        "operationId": "reproject",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgReprojectResponse"
+                }
+              }
+            },
+            "description": "How much was re-projected"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "Unknown username"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No authenticated principal"
+          }
+        },
+        "summary": "Re-project a user's stored propositions into graph edges without re-extracting from source",
+        "tags": [
+          "KG Reprojection"
+        ]
+      }
+    },
+    "/api/v1/admin/kg/runs": {
+      "get": {
+        "operationId": "runs_1",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/KgInFlightRun"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "The acting user's in-flight runs, newest first"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No authenticated principal and no resolvable username"
+          }
+        },
+        "summary": "List the acting user's in-flight virtual-cypher runs",
+        "tags": [
+          "Virtual Cypher"
+        ]
+      }
+    },
+    "/api/v1/admin/kg/runs/{runId}": {
+      "get": {
+        "operationId": "run_6",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "runId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgRunState"
+                }
+              }
+            },
+            "description": "The run's state, with its result once settled"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No authenticated principal and no resolvable username"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No such run or not yours"
+          }
+        },
+        "summary": "Get the state and, once settled, the result of a background run",
+        "tags": [
+          "Virtual Cypher"
+        ]
+      }
+    },
+    "/api/v1/admin/kg/runs/{runId}/answer": {
+      "post": {
+        "operationId": "answer_1",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "runId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KgAnswerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgAnswerAccepted"
+                }
+              }
+            },
+            "description": "The choice was accepted; the run's new state travels back"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgBadChoiceResponse"
+                }
+              }
+            },
+            "description": "Unknown choice"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No authenticated principal and no resolvable username"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No such run or not yours"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgRunConflictResponse"
+                }
+              }
+            },
+            "description": "Run not awaiting input"
+          }
+        },
+        "summary": "Answer a run parked awaiting input: proceed, narrow, background or cancel",
+        "tags": [
+          "Virtual Cypher"
+        ]
+      }
+    },
+    "/api/v1/admin/kg/schema": {
+      "get": {
+        "operationId": "schema",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgSchemaResponse"
+                }
+              }
+            },
+            "description": "The schema snapshot; empty lists and no `refreshedAt` when none exists"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No authenticated principal and no resolvable username"
+          }
+        },
+        "summary": "The acting user's graph schema — labels, properties, relationship triples",
+        "tags": [
+          "Virtual Cypher"
+        ]
+      }
+    },
+    "/api/v1/admin/kg/validate": {
+      "post": {
+        "operationId": "validate",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KgExecuteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgValidationResponse"
+                }
+              }
+            },
+            "description": "The verdict; `message` is present even when null"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No authenticated principal and no resolvable username"
+          }
+        },
+        "summary": "Validate Cypher against the schema without executing it",
+        "tags": [
+          "Virtual Cypher"
+        ]
+      }
+    },
+    "/api/v1/admin/kg/views": {
+      "get": {
+        "operationId": "views_1",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ViewDebugInfo"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Saved views across the world and realm tiers"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No authenticated principal and no resolvable username"
+          }
+        },
+        "summary": "List the acting user's saved views with their cache state",
+        "tags": [
+          "Virtual Cypher"
+        ]
+      },
+      "post": {
+        "operationId": "saveView",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KgSaveViewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgSaveViewResponse"
+                }
+              }
+            },
+            "description": "View saved"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgSaveViewRejection"
+                }
+              }
+            },
+            "description": "Invalid view — bad name, unrunnable body, or the name is taken"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No authenticated principal and no resolvable username"
+          }
+        },
+        "summary": "Save a user-authored view (optionally parameterized) into the acting user's world",
+        "tags": [
+          "Virtual Cypher"
+        ]
+      }
+    },
+    "/api/v1/admin/kg/views/{name}": {
+      "delete": {
+        "operationId": "deleteView",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgDeleteViewResponse"
+                }
+              }
+            },
+            "description": "View deleted"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No authenticated principal and no resolvable username"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No saved view of that name"
+          }
+        },
+        "summary": "Delete a user-authored view from the acting user's world",
+        "tags": [
+          "Virtual Cypher"
+        ]
+      }
+    },
+    "/api/v1/admin/kg/views/{name}/invocation": {
+      "post": {
+        "operationId": "viewInvocation",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KgInvokeViewRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgViewInvocationResponse"
+                }
+              }
+            },
+            "description": "The runnable cypher for this invocation"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "Bad view arguments"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No authenticated principal and no resolvable username"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "Unknown view"
+          }
+        },
+        "summary": "Return the runnable Cypher for a saved view invoked with the given arguments",
+        "tags": [
+          "Virtual Cypher"
+        ]
+      }
+    },
+    "/api/v1/admin/kg/views/{name}/refresh": {
+      "post": {
+        "operationId": "refreshView",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgRefreshViewResponse"
+                }
+              }
+            },
+            "description": "Whether anything was recomputed"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KgErrorResponse"
+                }
+              }
+            },
+            "description": "No authenticated principal and no resolvable username"
+          }
+        },
+        "summary": "Force-recompute a materialised view's cache now, ignoring its TTL",
+        "tags": [
+          "Virtual Cypher"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AnnotateDryRunRequest": {
+        "properties": {
+          "params": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "statement": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "params",
+          "statement"
+        ],
+        "type": "object"
+      },
+      "KgAnnotationDiff": {
+        "description": "One proposed property change, as it would be written.",
+        "properties": {
+          "after": {},
+          "before": {
+            "description": "The value before the write, or null when the property is new."
+          },
+          "identity": {
+            "description": "The target's identity property value. Type depends on the label's identity property."
+          },
+          "property": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "property"
+        ],
+        "type": "object"
+      },
+      "KgAnnotationDryRunResponse": {
+        "description": "A frozen annotation plan: what WOULD be written, with nothing written yet.",
+        "properties": {
+          "diffs": {
+            "items": {
+              "$ref": "#/components/schemas/KgAnnotationDiff"
+            },
+            "type": "array"
+          },
+          "expiresAt": {
+            "description": "When the frozen plan lapses, ISO-8601. Echo it back verbatim.",
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "planId": {
+            "description": "Pass this to /apply or /undo. Single-use and time-limited.",
+            "type": "string"
+          },
+          "property": {
+            "type": "string"
+          },
+          "selected": {
+            "description": "How many nodes the statement selected.",
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "diffs",
+          "expiresAt",
+          "label",
+          "planId",
+          "property",
+          "selected"
+        ],
+        "type": "object"
+      },
+      "KgAnnotationOutcomeResponse": {
+        "description": "The result of applying or undoing a frozen plan.",
+        "properties": {
+          "applied": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "conflicted": {
+            "description": "Targets that still exist but moved since the plan froze. Skipped, not forced.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "disappearedOrUnauthorized": {
+            "description": "Targets that could not be re-bound in scope: deleted, re-owned or re-labeled. Deliberately ONE bucket — separating them would leak whether another tenant's data exists.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "planId": {
+            "type": "string"
+          },
+          "postImages": {
+            "items": {
+              "$ref": "#/components/schemas/KgAnnotationPostImage"
+            },
+            "type": "array"
+          },
+          "selected": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "applied",
+          "conflicted",
+          "disappearedOrUnauthorized",
+          "planId",
+          "postImages",
+          "selected"
+        ],
+        "type": "object"
+      },
+      "KgAnnotationPostImage": {
+        "description": "One committed post-image, read back inside the write transaction.",
+        "properties": {
+          "auditId": {
+            "description": "Audit record id for this individual write.",
+            "type": "string"
+          },
+          "identity": {},
+          "property": {
+            "type": "string"
+          },
+          "value": {}
+        },
+        "required": [
+          "auditId",
+          "property"
+        ],
+        "type": "object"
+      },
+      "KgAnswerAccepted": {
+        "description": "Acknowledgement that a parked run accepted the owner's choice.",
+        "properties": {
+          "choice": {
+            "type": "string"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "state": {
+            "description": "The state the run moved to as a result.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "choice",
+          "runId",
+          "state"
+        ],
+        "type": "object"
+      },
+      "KgAnswerRequest": {
+        "properties": {
+          "choice": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "choice"
+        ],
+        "type": "object"
+      },
+      "KgAskRequest": {
+        "properties": {
+          "question": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "question"
+        ],
+        "type": "object"
+      },
+      "KgBackgroundHandle": {
+        "description": "A handle to a run started in the background.",
+        "properties": {
+          "choices": {
+            "additionalProperties": {},
+            "description": "The question a parked run poses to its owner. Absent while running.",
+            "type": "object"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "state": {
+            "description": "RUNNING, or WAITING_INPUT when the run parked on `choices`.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "runId",
+          "state"
+        ],
+        "type": "object"
+      },
+      "KgBadChoiceResponse": {
+        "description": "A rejected run answer, listing the choices this endpoint accepts.",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "valid": {
+            "description": "The accepted values for `choice`.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "error",
+          "valid"
+        ],
+        "type": "object"
+      },
+      "KgDecorationReport": {
+        "description": "What one decoration tick did.",
+        "properties": {
+          "candidates": {
+            "description": "Stale nodes this tick picked up. 0 with an `error` means the decorator is unknown.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "decorated": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "decorator": {
+            "type": "string"
+          },
+          "error": {
+            "description": "Why the tick could not complete, or null. Always present.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "failed": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skipped": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "candidates",
+          "decorated",
+          "decorator",
+          "error",
+          "failed",
+          "skipped"
+        ],
+        "type": "object"
+      },
+      "KgDecoratorInfo": {
+        "description": "A registered node decorator and the cadence it runs on.",
+        "properties": {
+          "batchSize": {
+            "description": "Most candidates one tick will process.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "refreshAfter": {
+            "description": "How stale a node must be before it is a candidate again, or `never`.",
+            "type": "string"
+          },
+          "stampProperty": {
+            "description": "The property stamped on a node once decorated — how staleness is judged.",
+            "type": "string"
+          },
+          "targetLabels": {
+            "description": "Labels this decorator considers as candidates.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "tickInterval": {
+            "description": "How often the scheduled tick fires, ISO-8601 duration.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "batchSize",
+          "name",
+          "refreshAfter",
+          "stampProperty",
+          "targetLabels",
+          "tickInterval"
+        ],
+        "type": "object"
+      },
+      "KgDecoratorListResponse": {
+        "description": "The registered node decorators.",
+        "properties": {
+          "decorators": {
+            "items": {
+              "$ref": "#/components/schemas/KgDecoratorInfo"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "decorators"
+        ],
+        "type": "object"
+      },
+      "KgDeleteViewResponse": {
+        "description": "A user-authored view was deleted.",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "description": "Always `deleted`.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "status"
+        ],
+        "type": "object"
+      },
+      "KgErrorResponse": {
+        "description": "A refusal carrying only a human-readable reason.",
+        "properties": {
+          "error": {
+            "description": "What went wrong, in the terms the caller can act on.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "type": "object"
+      },
+      "KgExecuteRequest": {
+        "properties": {
+          "cypher": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cypher"
+        ],
+        "type": "object"
+      },
+      "KgGenerateResponse": {
+        "description": "Generated cypher and what the engine will do with it, without running it.",
+        "properties": {
+          "attempts": {
+            "description": "How many generate-validate rounds it took.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "cypher": {
+            "type": "string"
+          },
+          "durationMs": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "explain": {
+            "description": "What the engine will do when this runs. Best-effort; never fails the call.",
+            "type": "string"
+          },
+          "question": {
+            "type": "string"
+          },
+          "valid": {
+            "description": "Whether the final attempt passed the strict preflight.",
+            "type": "boolean"
+          },
+          "violations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "attempts",
+          "cypher",
+          "durationMs",
+          "explain",
+          "question",
+          "valid",
+          "violations"
+        ],
+        "type": "object"
+      },
+      "KgInFlightRun": {
+        "description": "A virtual-cypher run currently executing for the acting user.",
+        "properties": {
+          "cypher": {
+            "type": "string"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "startedAt": {
+            "description": "Epoch milliseconds at which the run started.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "cypher",
+          "runId",
+          "startedAt"
+        ],
+        "type": "object"
+      },
+      "KgInvokeViewRequest": {
+        "properties": {
+          "args": {
+            "additionalProperties": {},
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "KgKillResponse": {
+        "description": "The outcome of a kill request.",
+        "properties": {
+          "killed": {
+            "description": "False when the run had already settled, or was never the caller's.",
+            "type": "boolean"
+          },
+          "runId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "killed",
+          "runId"
+        ],
+        "type": "object"
+      },
+      "KgQueryResult": {
+        "description": "The outcome of a virtual-cypher query: rows, the cypher that produced them, and what it cost.",
+        "properties": {
+          "apiCallLog": {
+            "description": "The actual calls as `producer(keys)`, in order — fan-out is visible here.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "apiCalls": {
+            "description": "External fetches the executor made. 0 means everything was cached or local.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "cypher": {
+            "description": "The cypher that actually ran, after scope rewriting.",
+            "type": "string"
+          },
+          "durationMs": {
+            "description": "Total: bridge-resolve plus materialize plus read.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "error": {
+            "description": "Why the query failed, or null when it did not.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hint": {
+            "description": "What to try instead. Accompanies an empty result only.",
+            "type": "string"
+          },
+          "llmCallLog": {
+            "description": "The actual LLM calls (kg-ask and agg-*), in order.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "llmCalls": {
+            "description": "LLM calls: the generation plus any aggregate reductions.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "question": {
+            "description": "The question asked, echoed back. Present only for `/ask`.",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Typed outcome when this was not a clean answer — UNBOUNDED, NOT_IN_GRAPH, MISSING_ATTRIBUTE, DISCONNECTED or INTERNAL_ERROR. Absent on a real answer, so a caller can tell 'cannot answer' from a genuine zero without reading the hint text.",
+            "type": "string"
+          },
+          "rowCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "additionalProperties": {},
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "run": {
+            "$ref": "#/components/schemas/KgRunRef"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "apiCallLog",
+          "apiCalls",
+          "cypher",
+          "durationMs",
+          "error",
+          "llmCallLog",
+          "llmCalls",
+          "rowCount",
+          "rows",
+          "warnings"
+        ],
+        "type": "object"
+      },
+      "KgRefreshViewResponse": {
+        "description": "Whether a materialised view's cache was recomputed.",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "refreshed": {
+            "description": "False for a regular or unknown view — nothing was recomputed.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "refreshed"
+        ],
+        "type": "object"
+      },
+      "KgReprojectResponse": {
+        "description": "How much of a user's stored propositions were re-projected into graph edges.",
+        "properties": {
+          "attempted": {
+            "description": "Relationships the projection attempted.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "durationMs": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "persisted": {
+            "description": "Relationships actually persisted.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "propositions": {
+            "description": "Propositions read for this context.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "attempted",
+          "durationMs",
+          "persisted",
+          "propositions",
+          "username"
+        ],
+        "type": "object"
+      },
+      "KgRunConflictResponse": {
+        "description": "The run was not awaiting input; its actual state travels with the refusal.",
+        "properties": {
+          "detail": {
+            "description": "Why it is in that state, when anything was recorded. Null otherwise.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "error": {
+            "type": "string"
+          },
+          "state": {
+            "description": "The run's real state: RUNNING, COMPLETED, KILLED, FAILED, CANCELLED or EXPIRED.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail",
+          "error",
+          "state"
+        ],
+        "type": "object"
+      },
+      "KgRunRef": {
+        "description": "A watchable run handle. Its presence means the rows are 'not yet', not 'none'.",
+        "properties": {
+          "answer": {
+            "description": "Where to send the owner's pick for a parked run. Absent while running.",
+            "type": "string"
+          },
+          "choices": {
+            "additionalProperties": {},
+            "description": "The `{kind, question, options, context}` payload when parked.",
+            "type": "object"
+          },
+          "kill": {
+            "description": "Where to stop the run. Absent when parked — nothing is executing to kill.",
+            "type": "string"
+          },
+          "poll": {
+            "description": "Where to poll for state and, once settled, the result.",
+            "type": "string"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "state": {
+            "description": "RUNNING (materializing now) or WAITING_INPUT (parked on `choices`).",
+            "type": "string"
+          }
+        },
+        "required": [
+          "poll",
+          "runId",
+          "state"
+        ],
+        "type": "object"
+      },
+      "KgRunState": {
+        "description": "The state of a background run, with its result once it has settled.",
+        "properties": {
+          "choices": {
+            "additionalProperties": {},
+            "description": "The question a parked run poses to its owner.",
+            "type": "object"
+          },
+          "cypher": {
+            "type": "string"
+          },
+          "detail": {
+            "description": "Why the run ended as it did, when anything was recorded.",
+            "type": "string"
+          },
+          "endedAt": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "expiresAt": {
+            "description": "Epoch milliseconds at which a parked run lapses into EXPIRED.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "result": {
+            "$ref": "#/components/schemas/KgQueryResult"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "startedAt": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "state": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cypher",
+          "runId",
+          "startedAt",
+          "state"
+        ],
+        "type": "object"
+      },
+      "KgSaveViewRejection": {
+        "description": "A view was refused: a bad name, an unrunnable body, or a name already taken.",
+        "properties": {
+          "error": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "violations": {
+            "description": "Preflight defects when the body names shapes the schema contradicts.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "error",
+          "ok"
+        ],
+        "type": "object"
+      },
+      "KgSaveViewRequest": {
+        "properties": {
+          "cypher": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "materialized": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "outputLabel": {
+            "type": "string"
+          },
+          "params": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ViewParamSpec"
+            },
+            "type": "object"
+          },
+          "ttl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cypher",
+          "name"
+        ],
+        "type": "object"
+      },
+      "KgSaveViewResponse": {
+        "description": "A view was saved.",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "ok"
+        ],
+        "type": "object"
+      },
+      "KgSchemaLabel": {
+        "description": "A node label and its sampled property shape.",
+        "properties": {
+          "exhaustive": {
+            "description": "True when every node carrying this label was inspected, so an absent property genuinely does not exist here. False means the sample was capped — evidence of what exists, and no evidence at all about what does not.",
+            "type": "boolean"
+          },
+          "label": {
+            "type": "string"
+          },
+          "properties": {
+            "items": {
+              "$ref": "#/components/schemas/KgSchemaProperty"
+            },
+            "type": "array"
+          },
+          "sampleCount": {
+            "description": "How many nodes were sampled when inferring the properties.",
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "exhaustive",
+          "label",
+          "properties",
+          "sampleCount"
+        ],
+        "type": "object"
+      },
+      "KgSchemaProperty": {
+        "description": "A property observed on nodes carrying a label.",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "sparse": {
+            "description": "True when the property was missing from a non-trivial fraction of the sample.",
+            "type": "boolean"
+          },
+          "type": {
+            "description": "Inferred type tag: string, long, datetime, list<string>, any, …",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "sparse",
+          "type"
+        ],
+        "type": "object"
+      },
+      "KgSchemaRelationship": {
+        "description": "A (from, type, to) triple observed in the world subgraph.",
+        "properties": {
+          "count": {
+            "description": "Approximate occurrence count, for ranking.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "count",
+          "from",
+          "to",
+          "type"
+        ],
+        "type": "object"
+      },
+      "KgSchemaResponse": {
+        "description": "Labels, their properties, and relationship triples reachable by the acting user.",
+        "properties": {
+          "labels": {
+            "items": {
+              "$ref": "#/components/schemas/KgSchemaLabel"
+            },
+            "type": "array"
+          },
+          "refreshedAt": {
+            "description": "When the snapshot was taken, ISO-8601. Absent when there is no snapshot.",
+            "type": "string"
+          },
+          "relationships": {
+            "items": {
+              "$ref": "#/components/schemas/KgSchemaRelationship"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "labels",
+          "relationships"
+        ],
+        "type": "object"
+      },
+      "KgValidationResponse": {
+        "description": "The result of validating cypher against the schema without executing it.",
+        "properties": {
+          "message": {
+            "description": "A single human-readable summary, or null when there is nothing to say.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "violations": {
+            "description": "What the schema contradicts, one entry per defect.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "message",
+          "ok",
+          "violations"
+        ],
+        "type": "object"
+      },
+      "KgViewInvocationResponse": {
+        "description": "The runnable cypher for a saved view invoked with the given arguments.",
+        "properties": {
+          "cypher": {
+            "description": "Run this through `/execute`, so a view uses the same engine as any other query.",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cypher",
+          "name"
+        ],
+        "type": "object"
+      },
+      "ViewDebugInfo": {
+        "properties": {
+          "cachedMembers": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "cypher": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "materialized": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "outputLabel": {
+            "type": "string"
+          },
+          "params": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ViewParamSpec"
+            },
+            "type": "object"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ttl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cypher",
+          "description",
+          "materialized",
+          "name",
+          "params"
+        ],
+        "type": "object"
+      },
+      "ViewParamSpec": {
+        "properties": {
+          "default": {
+            "description": "Used when an invocation omits this param. Absent = required on invocation."
+          },
+          "description": {
+            "description": "What the argument means — rendered verbatim as the field's hint.",
+            "type": "string"
+          },
+          "type": {
+            "default": "string",
+            "description": "`string`, `int`, `number` or `boolean` — the coercion applied to supplied values.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      }
+    }
+  },
+  "security": [
+    {
+      "basicAuth": []
+    }
+  ]
+}

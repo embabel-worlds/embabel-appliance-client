@@ -1,0 +1,22 @@
+{
+  "name": "embabel-appliance-client",
+  "private": true,
+  "description": "The shared client the Embabel Worlds console and the Embabel Me app both talk to the appliance through.",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "spec": "node scripts/wrap-spec.mjs",
+    "generate": "npm run spec && npm run generate --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "check": "npm run generate && npm run build && npm run test"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.1",
+    "esbuild": "^0.24.2",
+    "openapi-typescript": "^7.4.4",
+    "typescript": "^5.7.2"
+  },
+  "license": "UNLICENSED"
+}

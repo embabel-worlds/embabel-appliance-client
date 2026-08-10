@@ -1,0 +1,29 @@
+{
+  "name": "@embabel/appliance-client",
+  "version": "0.0.1",
+  "description": "Transport-blind client for the Embabel appliance REST surface. No DOM, no framework.",
+  "type": "module",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "generate": "openapi-typescript ../../spec/openapi.json -o src/generated/openapi.ts",
+    "build": "npm run build:esm && npm run build:cjs && npm run build:global",
+    "build:esm": "tsc -p tsconfig.build.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json && node -e \"require('fs').writeFileSync('dist/cjs/package.json', JSON.stringify({type:'commonjs'}))\"",
+    "build:global": "esbuild src/index.ts --bundle --format=iife --global-name=EmbabelApplianceClient --outfile=dist/global/embabel-appliance-client.js",
+    "test": "node --experimental-transform-types --test test/*.test.ts"
+  },
+  "license": "UNLICENSED"
+}
