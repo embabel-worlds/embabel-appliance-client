@@ -35,6 +35,20 @@ look free.
 - `aliasMap`, `propertiesOf`, `labelNames`, `relationshipTypes` — reading the
   schema snapshot, which is the SAME one the engine's preflight validates
   against, so what an editor offers and what validation accepts cannot disagree.
+- `edgeContext`, `relationshipTypesFor`, `nodeContext`, `connectedLabels`,
+  `propertyMapContext` — pattern-aware completion, always alphabetical. After `[:`, only the edges the
+  schema has seen at the node on the left: `(d:Document)-[:` offers Document's
+  edges. After a relationship, only the labels at its far end:
+  `(n:Document)-[:MENTIONS]-(c:` asks what a Document can mention, not for
+  every label under the sun. Both offers widen in tiers — typed direction,
+  then either direction, then whatever the snapshot still knows (the type
+  alone, when the source has no triple for it), and the full vocabulary only
+  when there is nothing to scope by. A known label with no edges at all offers
+  *nothing*: some labels really are edgeless — gov-au's Electorate joins by
+  postcode property — and a hint offers, it never forbids. Inside a node's
+  property map, `(c:Concept {` offers the KEYS that label actually has, minus
+  the ones the map already binds — never inside a string value, never in an
+  edge's `{via:…}`/`ai:{…}` maps, which have their own vocabulary.
 - `declaredParams` — the `$name` bind variables a saved view declares, minus the
   namespaces the engine owns (`$userId`, `$realm`, …). A control for `$userId`
   invites someone to set it, and that is a scoping question, not a form field.
@@ -52,7 +66,7 @@ A lost `WHERE`, a changed alias, an unescaped quote, and the query means
 something else.
 
 ```bash
-npm test    # 26 checks, 8 of them byte-for-byte goldens
+npm test    # 40 checks, 8 of them byte-for-byte goldens
 ```
 
 ## Next

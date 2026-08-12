@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, it } from 'node:test'
 import { compose, type ComposeSpec } from '../src/compose.ts'
-import { aliasMap, declaredParams, propertiesOf, relationshipTypes } from '../src/index.ts'
+import { aliasMap, connectedLabels, declaredParams, edgeContext, nodeContext, propertiesOf, propertyMapContext, relationshipTypes, relationshipTypesFor } from '../src/index.ts'
 
 /**
  * THE COMPOSER, PINNED TO THE CODE IT WAS LIFTED FROM.
@@ -149,6 +149,108 @@ describe('schema reading', () => {
 
   it('dedupes relationship types across triples', () => {
     assert.deepEqual(relationshipTypes(schema), ['KNOWS'])
+  })
+})
+
+describe('edge scoping', () => {
+  const schema = {
+    labels: ['Document', 'Chunk', 'Person', 'Organization', 'Place', 'Electorate'].map((label) => ({ label, properties: [] })),
+    relationships: [
+      { from: 'Document', type: 'CONTAINS_CHUNK', to: 'Chunk' },
+      { from: 'Document', type: 'MENTIONS', to: 'Person' },
+      { from: 'Document', type: 'MENTIONS', to: 'Place' },
+      { from: 'Person', type: 'KNOWS', to: 'Person' },
+      { from: 'Person', type: 'WORKS_AT', to: 'Organization' },
+    ],
+  }
+  const all = ['CONTAINS_CHUNK', 'KNOWS', 'MENTIONS', 'WORKS_AT']
+
+  it('offers only the edges the schema has seen leaving that label, alphabetically', () => {
+    assert.deepEqual(relationshipTypesFor(schema, 'Document', 'out'), ['CONTAINS_CHUNK', 'MENTIONS'])
+  })
+
+  it('reverses for an arriving edge', () => {
+    assert.deepEqual(relationshipTypesFor(schema, 'Person', 'in'), ['KNOWS', 'MENTIONS'])
+    assert.deepEqual(relationshipTypesFor(schema, 'Person', 'any'), ['KNOWS', 'MENTIONS', 'WORKS_AT'])
+  })
+
+  it('widens to edges touching the label when the typed direction has none', () => {
+    // Chunk has no OUT-edges but is not edgeless — the pattern may be
+    // undirected, or the arrow about to point the other way.
+    assert.deepEqual(relationshipTypesFor(schema, 'Chunk', 'out'), ['CONTAINS_CHUNK'])
+  })
+
+  it('offers nothing for a known label with no edges at all', () => {
+    // gov-au's Electorate joins to grants by postcode PROPERTY, not by edge;
+    // offering the whole vocabulary there dresses noise up as knowledge. A
+    // hint offers and never forbids, so silence still lets the user type on.
+    assert.deepEqual(relationshipTypesFor(schema, 'Electorate', 'out'), [])
+  })
+
+  it('falls back to every type only when there is nothing to scope by', () => {
+    // Nowhere is not in the snapshot at all — a typo or a label the sample
+    // missed entirely; sampled ≠ exhaustive, so the full vocabulary returns.
+    assert.deepEqual(relationshipTypesFor(schema, 'Nowhere', 'any'), all)
+    assert.deepEqual(relationshipTypesFor(schema, null), all)
+  })
+
+  it('reads the node left of the bracket, label or alias', () => {
+    assert.deepEqual(edgeContext('MATCH (d:Document)-[', {}), { label: 'Document', direction: 'out' })
+    assert.deepEqual(edgeContext('MATCH (d)-[r:CON', { d: 'Document' }), { label: 'Document', direction: 'out' })
+    assert.deepEqual(edgeContext('MATCH (:Person)<-[', {}), { label: 'Person', direction: 'in' })
+    assert.deepEqual(edgeContext("MATCH (d:Document {uri:'x'})-[", {}), { label: 'Document', direction: 'out' })
+  })
+
+  it('claims no opinion when nothing node-shaped precedes the bracket', () => {
+    assert.equal(edgeContext('MATCH [', {}), null, 'a pattern started at the bracket')
+    assert.equal(edgeContext('-[:REL', {}), null, 'the node is on an earlier line')
+    assert.deepEqual(edgeContext('MATCH (d)-[', {}), { label: null, direction: 'out' }, 'an alias the query never declares')
+  })
+
+  it('names what a Document can mention, not every label under the sun', () => {
+    assert.deepEqual(connectedLabels(schema, 'Document', 'MENTIONS', 'out'), ['Person', 'Place'])
+    assert.deepEqual(connectedLabels(schema, 'Document', 'MENTIONS', 'any'), ['Person', 'Place'])
+    assert.deepEqual(connectedLabels(schema, 'Organization', 'WORKS_AT', 'in'), ['Person'])
+  })
+
+  it('scopes by the source alone when the bracket names no type', () => {
+    assert.deepEqual(connectedLabels(schema, 'Document', null, 'out'), ['Chunk', 'Person', 'Place'])
+  })
+
+  it('scopes by the type alone when the source has no triple for it', () => {
+    // The sample may have missed the (Chunk, MENTIONS, …) pairing; the type the
+    // user TYPED still says which far ends are plausible.
+    assert.deepEqual(connectedLabels(schema, 'Chunk', 'MENTIONS', 'out'), ['Person', 'Place'])
+    // …and with no source at all, the type still narrows.
+    assert.deepEqual(connectedLabels(schema, null, 'KNOWS', 'out'), ['Person'])
+  })
+
+  it('stays silent for a known edgeless source, and offers all only with nothing to scope by', () => {
+    assert.deepEqual(connectedLabels(schema, 'Electorate', null, 'out'), [])
+    const everything = ['Chunk', 'Document', 'Electorate', 'Organization', 'Person', 'Place']
+    assert.deepEqual(connectedLabels(schema, 'Document', 'INVENTED', 'out'), everything, 'a type the snapshot never saw')
+    assert.deepEqual(connectedLabels(schema, null, null, 'any'), everything)
+  })
+
+  it('reads whose property map is being typed, and what it already binds', () => {
+    assert.deepEqual(propertyMapContext('MATCH (e:File)-[:RELEVANT_TO]-(c:Concept {', {}), { label: 'Concept', used: [] })
+    assert.deepEqual(propertyMapContext('MATCH (c {na', { c: 'Concept' }), { label: 'Concept', used: [] })
+    assert.deepEqual(propertyMapContext("MATCH (c:Concept {name: 'x', sc", {}), { label: 'Concept', used: ['name'] })
+  })
+
+  it('offers no keys where a key is not what is being typed', () => {
+    assert.equal(propertyMapContext("MATCH (c:Concept {name: 'Ad", {}), null, 'inside a string value')
+    assert.equal(propertyMapContext('MATCH (c:Concept {name:', {}), null, 'a value position')
+    assert.equal(propertyMapContext('MATCH (c:Concept)', {}), null, 'not in a map at all')
+    assert.equal(propertyMapContext("MATCH ()-[r:RELEVANT_TO {via:'keyword', ai:{hi", {}), null, "an edge map has its own vocabulary, not the schema's")
+  })
+
+  it('reads the pattern a node is being typed into', () => {
+    assert.deepEqual(nodeContext('MATCH (n:Document)-[:MENTIONS]-(c:', {}), { label: 'Document', type: 'MENTIONS', direction: 'any' })
+    assert.deepEqual(nodeContext('MATCH (n:Document)-[r:MENTIONS]->(c:Pe', {}), { label: 'Document', type: 'MENTIONS', direction: 'out' })
+    assert.deepEqual(nodeContext('MATCH (p:Person)<-[:KNOWS]-(q:', {}), { label: 'Person', type: 'KNOWS', direction: 'in' })
+    assert.deepEqual(nodeContext('MATCH (d)-->(c:', { d: 'Document' }), { label: 'Document', type: null, direction: 'out' })
+    assert.equal(nodeContext('MATCH (n:', {}), null, "the pattern's first node — no opinion")
   })
 })
 
