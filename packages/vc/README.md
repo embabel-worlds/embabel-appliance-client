@@ -48,7 +48,12 @@ look free.
   postcode property — and a hint offers, it never forbids. Inside a node's
   property map, `(c:Concept {` offers the KEYS that label actually has, minus
   the ones the map already binds — never inside a string value, never in an
-  edge's `{via:…}`/`ai:{…}` maps, which have their own vocabulary.
+  edge's `{via:…}`/`ai:{…}` maps, which have their own vocabulary. The FIRST
+  `(x:` of a MATCH offers only `anchorLabels` — the engine's own per-label
+  verdict (`anchor` on the schema snapshot) of what may open a pattern: bound
+  anchors and populations user tenancy anchors implicitly. Reach-only labels
+  complete after an edge, where they are legal; an older appliance sends no
+  flags and everything passes.
 - `declaredParams` — the `$name` bind variables a saved view declares, minus the
   namespaces the engine owns (`$userId`, `$realm`, …). A control for `$userId`
   invites someone to set it, and that is a scoping question, not a form field.
@@ -66,7 +71,7 @@ A lost `WHERE`, a changed alias, an unescaped quote, and the query means
 something else.
 
 ```bash
-npm test    # 40 checks, 8 of them byte-for-byte goldens
+npm test    # 41 checks, 8 of them byte-for-byte goldens
 ```
 
 ## Next

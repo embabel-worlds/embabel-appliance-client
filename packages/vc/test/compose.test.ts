@@ -3,8 +3,8 @@ import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, it } from 'node:test'
-import { compose, type ComposeSpec } from '../src/compose.ts'
-import { aliasMap, connectedLabels, declaredParams, edgeContext, nodeContext, propertiesOf, propertyMapContext, relationshipTypes, relationshipTypesFor } from '../src/index.ts'
+import { compose, TIPS, type ComposeSpec } from '../src/compose.ts'
+import { aliasMap, anchorLabels, connectedLabels, declaredParams, edgeContext, nodeContext, propertiesOf, propertyMapContext, relationshipTypes, relationshipTypesFor } from '../src/index.ts'
 
 /**
  * THE COMPOSER, PINNED TO THE CODE IT WAS LIFTED FROM.
@@ -18,6 +18,13 @@ import { aliasMap, connectedLabels, declaredParams, edgeContext, nodeContext, pr
  * That matters because this Cypher is not decorative. A user edits it and runs
  * it: a lost `WHERE`, a changed alias, an unescaped quote, and the query means
  * something else.
+ *
+ * DELIBERATE edits since capture — a golden changes only when the product does,
+ * and each change is named here:
+ *  - Trailing tip comments removed from every composed query (and the canvas
+ *    primer moved wholesale): the teaching now ships as [TIPS] for a Tips
+ *    affordance. The judged-mode COST comment stays in the text — a price tag
+ *    at the moment of choice is not a tip.
  */
 
 /**
@@ -54,6 +61,16 @@ describe('compose matches the Query Studio it was lifted from', () => {
   it('covers every target', () => {
     const targets = new Set(Object.values(goldens).map((g) => g.spec.target))
     assert.deepEqual([...targets].sort(), ['canvas', 'documents', 'files', 'threads'])
+  })
+
+  it('keeps no tip in the query text — the teaching moved to TIPS, whole', () => {
+    // The judged-mode COST warning is the one comment allowed to remain.
+    for (const [name, golden] of Object.entries(goldens)) {
+      const comments = compose(toComposeSpec(golden.spec)).split('\n').filter((l) => l.trim().startsWith('//'))
+      assert.ok(comments.every((c) => c.includes('judged retrieval')), `${name} carries a non-cost comment: ${comments}`)
+    }
+    assert.deepEqual(Object.keys(TIPS).sort(), ['canvas', 'documents', 'files', 'threads'])
+    assert.ok(TIPS.documents.some((t) => t.includes('ai.relevant')), 'per-row judgment still taught, as a tip')
   })
 })
 
@@ -243,6 +260,23 @@ describe('edge scoping', () => {
     assert.equal(propertyMapContext('MATCH (c:Concept {name:', {}), null, 'a value position')
     assert.equal(propertyMapContext('MATCH (c:Concept)', {}), null, 'not in a map at all')
     assert.equal(propertyMapContext("MATCH ()-[r:RELEVANT_TO {via:'keyword', ai:{hi", {}), null, "an edge map has its own vocabulary, not the schema's")
+  })
+
+  it('offers only pattern-opening labels at first position', () => {
+    // The engine's own verdict rides the snapshot: Summary is reach-only, so the
+    // first `(x:` of a MATCH must not offer it — after an edge it completes fine.
+    const flagged = {
+      labels: [
+        { label: 'Document', properties: [], anchor: true },
+        { label: 'Summary', properties: [], anchor: false },
+        { label: 'Person', properties: [] },
+      ],
+      relationships: [],
+    }
+    assert.deepEqual(anchorLabels(flagged), ['Document', 'Person'], 'an absent flag means true, not false')
+    assert.deepEqual(anchorLabels(schema), schema.labels.map((l) => l.label).sort((a, b) => a.localeCompare(b)),
+      'an older appliance sends no flags — everything passes')
+    assert.deepEqual(anchorLabels(null), [])
   })
 
   it('reads the pattern a node is being typed into', () => {

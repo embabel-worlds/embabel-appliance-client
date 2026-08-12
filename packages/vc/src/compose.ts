@@ -8,14 +8,15 @@ import { type AnchorId, type Mode, type TargetId, TARGETS, esc } from './targets
  * argument and the string is the return value, so it runs in a browser, in
  * Electron's main process, or in a test with no browser at all.
  *
- * The output is BYTE-IDENTICAL to what the Query Studio produced before the
- * lift — `test/compose.test.ts` checks it against goldens captured by running
- * the original code, not against what this file looks like it should do.
+ * The output is pinned by `test/compose.test.ts` against goldens — captured by
+ * running the original Query Studio code at the lift, then EDITED deliberately
+ * when the product changes on purpose (each such change is named in the test).
  *
- * The trailing comment blocks are load-bearing, not decoration. Per-row LLM
- * judgment (`ai.relevant`, `ai.score`, `ai.classify`) is textual by nature, so
- * the composer teaches it as commented lines one uncomment away rather than as a
- * control that would imply it is free.
+ * The teaching that used to trail every composed query as comment lines lives
+ * in [TIPS] now, for a surface to show behind a Tips affordance: trailing
+ * comments made three-line queries read as complex, and a tip is not part of
+ * the query. The one comment that STAYS in the text is the judged-mode cost
+ * warning — a price tag at the moment of choice is not a tip.
  */
 
 export interface AiSteering {
@@ -105,12 +106,6 @@ function composeDocuments(spec: ComposeSpec): string {
     where.length ? `WHERE ${where.join('\n  AND ')}` : null,
     `RETURN d.title AS title, ${evidence}`,
     `ORDER BY r.score DESC LIMIT ${limitOf(spec)}`,
-    '',
-    '// Per-row LLM judgment over the fetched rows — one uncomment away:',
-    "//   AND ai.relevant(d, 'genuinely about <your criterion>')      -- filter",
-    "//   ORDER BY ai.score(d, '<your criterion>') DESC               -- rerank",
-    '// Content, not metadata: MATCH (d)-[:HAS_SUMMARY]->(s:Summary) RETURN s.summary',
-    '// AND at the document: a second seed meeting the same d asserts BOTH terms.',
   )
 }
 
@@ -124,9 +119,6 @@ function composeFiles(spec: ComposeSpec): string {
       `MATCH (:Concept {value:'${esc(seed)}'})-[r:RELEVANT_TO {via:'keyword'}]->(f:File)`,
       `RETURN f.name AS name, f.dir AS dir, f.content AS excerpt, f.modifiedAt AS modified`,
       `ORDER BY modified DESC LIMIT ${limitOf(spec)}`,
-      '',
-      '// The excerpt holds the matching lines, never the whole file body.',
-      '// For summarization use the Documents target — files are metadata + grep.',
     )
   }
   const seed = str(spec.seed).trim() || 'your idea'
@@ -148,29 +140,48 @@ function composeThreads(spec: ComposeSpec): string {
     `WHERE r.score >= ${floor}`,
     `RETURN t.subject AS subject, t.snippet AS snippet, r.score AS score`,
     `ORDER BY r.score DESC LIMIT ${limitOf(spec)}`,
-    '',
-    "// RELEVANT_TO is semantic — 'reads as being about', never 'corresponded with'.",
-    '// Compose with structure: (me:AssistantUser)-[:EMAILED]->(p:Person)-[r:RELEVANT_TO]->(t)',
   )
 }
 
 function composeCanvas(_spec: ComposeSpec): string {
   return lines(
-    '// The whole graph is yours — the Schema panel lists every node type here.',
-    '// Shapes the engine serves:',
-    "//   (:Concept {value:'…'})-[r:RELEVANT_TO]->(d:Document)            -- about (vector)",
-    "//   (:Concept {value:'…'})-[r:RELEVANT_TO {via:'keyword'}]->(d)     -- mentions",
-    "//   (:Concept)-[r:RELEVANT_TO {via:'agentic-rag', intent:'…'}]->(d) -- judged",
-    "//   (:Concept {value:'…'})-[r:RELEVANT_TO {via:'keyword'}]->(f:File)",
-    '//   (:Person|Organization|Meeting)-[r:RELEVANT_TO]->(t:RelevantEmailThread)',
-    '//   (d:Document)-[:HAS_SUMMARY]->(s:Summary)',
-    "//   WHERE 'tag' IN d.tags — membership, never CONTAINS (tags is a list)",
-    "//   ai.relevant(n, '…') / ai.score(n, '…') / ai.classify(n, '…') — per-row LLM judgment",
-    '',
     'MATCH (d:Document)',
     'RETURN d.title AS title, d.tags AS tags, d.uri AS uri',
     'ORDER BY d.ingestionTimestamp DESC LIMIT 25',
   )
+}
+
+/**
+ * The teaching that used to trail composed queries as comment lines, per
+ * target — for a surface's Tips affordance. Same knowledge, moved: a tip in
+ * the query text made a three-line query read as complex, and it was gone the
+ * moment the user composed again.
+ */
+export const TIPS: Record<TargetId, string[]> = {
+  documents: [
+    "Per-row LLM judgment over the fetched rows — add AND ai.relevant(d, 'genuinely about <your criterion>') to filter, or ORDER BY ai.score(d, '<your criterion>') DESC to rerank.",
+    'Content, not metadata: MATCH (d)-[:HAS_SUMMARY]->(s:Summary) RETURN s.summary.',
+    'AND at the document: a second seed meeting the same d asserts BOTH terms.',
+  ],
+  files: [
+    'The excerpt holds the matching lines, never the whole file body.',
+    'For summarization use the Documents target — files are metadata + grep.',
+  ],
+  threads: [
+    "RELEVANT_TO is semantic — 'reads as being about', never 'corresponded with'.",
+    'Compose with structure: (me:AssistantUser)-[:EMAILED]->(p:Person)-[r:RELEVANT_TO]->(t).',
+  ],
+  canvas: [
+    'The whole graph is yours — the Schema panel lists every node type here.',
+    "About (vector): (:Concept {value:'…'})-[r:RELEVANT_TO]->(d:Document).",
+    "Mentions (keyword): (:Concept {value:'…'})-[r:RELEVANT_TO {via:'keyword'}]->(d).",
+    "Judged (agentic): (:Concept)-[r:RELEVANT_TO {via:'agentic-rag', intent:'…'}]->(d).",
+    "Files by keyword: (:Concept {value:'…'})-[r:RELEVANT_TO {via:'keyword'}]->(f:File).",
+    'Threads: (:Person|Organization|Meeting)-[r:RELEVANT_TO]->(t:RelevantEmailThread).',
+    'Summaries: (d:Document)-[:HAS_SUMMARY]->(s:Summary).',
+    "Tags are a list: WHERE 'tag' IN d.tags — membership, never CONTAINS.",
+    "Per-row LLM judgment: ai.relevant(n, '…') / ai.score(n, '…') / ai.classify(n, '…').",
+  ],
 }
 
 const COMPOSERS: Record<TargetId, (spec: ComposeSpec) => string> = {

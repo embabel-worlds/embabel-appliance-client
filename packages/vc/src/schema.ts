@@ -8,7 +8,18 @@
  */
 
 export interface SchemaProperty { name: string; type: string; sparse?: boolean }
-export interface SchemaLabel { label: string; properties: SchemaProperty[]; sampleCount?: number; exhaustive?: boolean }
+export interface SchemaLabel {
+  label: string
+  properties: SchemaProperty[]
+  sampleCount?: number
+  exhaustive?: boolean
+  /**
+   * Whether this label may OPEN a MATCH pattern bare — the engine's own verdict: a real label, or a
+   * virtual population implicitly bound by user tenancy. False means reach-only: legal only by
+   * traversal from a bound anchor. Absent on an older appliance, which readers treat as true.
+   */
+  anchor?: boolean
+}
 export interface SchemaRelationship { from: string; type: string; to: string; count?: number }
 export interface GraphSchema {
   refreshedAt?: string
@@ -32,6 +43,19 @@ export function propertiesOf(schema: GraphSchema | null | undefined, label: stri
 
 export function labelNames(schema: GraphSchema | null | undefined): string[] {
   return schema?.labels.map((l) => l.label) ?? []
+}
+
+/**
+ * Labels that may OPEN a pattern — what the FIRST `(x:` of a MATCH offers. The engine rejects a bare
+ * read of a reach-only virtual label (`anchor: false`), so offering one there completes a query the
+ * preflight refuses; after an edge, every reachable label is fair and {@link connectedLabels} rules.
+ * An older appliance sends no flag at all, and everything passes — no opinion, not "nothing".
+ */
+export function anchorLabels(schema: GraphSchema | null | undefined): string[] {
+  return (schema?.labels ?? [])
+    .filter((l) => l.anchor !== false)
+    .map((l) => l.label)
+    .sort((a, b) => a.localeCompare(b))
 }
 
 /** Relationship types, deduped and sorted — the schema lists one entry per (from, type, to) triple. */
