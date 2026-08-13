@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "types": ["node"],
+    // The tests import `../src/x.ts` directly, because they run under Node's own type
+    // stripping (`--experimental-transform-types`) rather than through a build.
+    "allowImportingTsExtensions": true
+  },
+  "include": ["src", "test"]
+}

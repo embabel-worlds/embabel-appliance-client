@@ -1,0 +1,25 @@
+{
+  "name": "@embabel/studio-kit",
+  "version": "0.0.1",
+  "description": "The studios' shared editor behavior — DOM, no transport, no framework. Semantics (@embabel/vc, @embabel/code-surface) are injected, never bundled.",
+  "type": "module",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "npm run build:esm && npm run build:cjs && npm run build:global",
+    "build:esm": "tsc -p tsconfig.build.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json && node -e \"require('fs').writeFileSync('dist/cjs/package.json', JSON.stringify({type:'commonjs'}))\"",
+    "build:global": "esbuild src/index.ts --bundle --format=iife --global-name=EmbabelStudioKit --outfile=dist/global/embabel-studio-kit.js",
+    "test": "node --experimental-transform-types --test test/*.test.ts"
+  },
+  "license": "UNLICENSED"
+}
