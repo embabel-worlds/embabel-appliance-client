@@ -1,6 +1,9 @@
 # @embabel/appliance-ui
 
-The Embabel visual language, in CSS. One copy, two doors.
+The Embabel visual language. One copy, two doors.
+
+CSS, plus the one piece of JavaScript that could not be CSS: the living-graph
+backdrop, which needs per-frame edge geometry and therefore a canvas.
 
 The schematic, drawn in light lines on black: graph paper, a slow aurora, the
 brand indigo as the **one** signal colour, green and red reserved for lamps.
@@ -86,8 +89,30 @@ Layers cascade `tokens → ground → base → components → markdown`. Take a 
 when a surface is embedded in someone else's page: **`ground.css` repaints the
 whole viewport** and is the one layer you may not want.
 
-`ground.css` leaves `z-index: -1` free for an app's own moving background — Me
-draws a living graph there — via `.embabel-backdrop`.
+`ground.css` leaves `z-index: -1` free for a moving background via
+`.embabel-backdrop`, and [`src/backdrop.ts`](src/backdrop.ts) is what draws
+there — sparse nodes drifting, edges appearing between neighbours as they pass,
+fragments of what the surface actually does rising through it.
+
+```js
+import { startBackdrop } from '@embabel/appliance-ui/backdrop'
+
+const stop = startBackdrop(canvas, {
+  snippets: [...],   // REQUIRED: what this surface really does, never lorem
+  brightness: 0.55,  // 1 is the reference weight — the console's
+})
+```
+
+Each door passes its own **snippets** (the console shows code-mode calls it can
+execute, Me shows sensor readings it takes) and its own **brightness**. One
+multiplier rather than a set of alphas, because the alphas encode the
+relationships — a hub brighter than a node, an edge fainter than both — and
+hand-tuning each per surface is exactly how the two copies drifted apart before
+this moved here. `startBackdrop` returns a stop function; a component calls it
+on teardown, a page never does.
+
+Built three ways like the other packages: ESM and CJS for bundlers, and an IIFE
+at `dist/global/embabel-backdrop.js` for Me, whose renderer takes globals.
 
 ## What is NOT here
 
@@ -98,6 +123,11 @@ shared file that knew about either would make them one app pretending to be two.
 
 The rule: something enters this package when **both** products need it, never in
 anticipation, and this package never imports from either app.
+
+The backdrop is the rule working as intended rather than an exception to it: two
+hand-written copies of the same animation had already drifted — different alphas
+in four places, different fragment counts, and both silently ignoring
+`prefers-reduced-motion` while claiming in a comment to honour it.
 
 ## Guards
 

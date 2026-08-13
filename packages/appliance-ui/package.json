@@ -2,8 +2,10 @@
   "name": "@embabel/appliance-ui",
   "version": "0.0.1",
   "description": "The Embabel visual language: tokens, ground, and the components both the Worlds console and the Me app are built from.",
+  "type": "module",
   "files": [
     "css",
+    "dist",
     "README.md"
   ],
   "exports": {
@@ -13,9 +15,18 @@
     "./base.css": "./css/base.css",
     "./components.css": "./css/components.css",
     "./markdown.css": "./css/markdown.css",
-    "./index.css": "./css/index.css"
+    "./index.css": "./css/index.css",
+    "./backdrop": {
+      "types": "./dist/esm/backdrop.d.ts",
+      "import": "./dist/esm/backdrop.js",
+      "require": "./dist/cjs/backdrop.js"
+    }
   },
   "scripts": {
+    "build": "npm run build:esm && npm run build:cjs && npm run build:global",
+    "build:esm": "tsc -p tsconfig.build.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json && node -e \"require('fs').writeFileSync('dist/cjs/package.json', JSON.stringify({type:'commonjs'}))\"",
+    "build:global": "esbuild src/backdrop.ts --bundle --format=iife --global-name=EmbabelBackdrop --outfile=dist/global/embabel-backdrop.js",
     "test": "node --test test/*.test.mjs"
   },
   "license": "UNLICENSED"
