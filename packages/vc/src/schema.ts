@@ -7,7 +7,13 @@
  * from a generic word list would break that promise quietly.
  */
 
-export interface SchemaProperty { name: string; type: string; sparse?: boolean }
+export interface SchemaProperty {
+  name: string
+  type: string
+  sparse?: boolean
+  /** The property's declared description, verbatim from the realm's registry — for hover. */
+  description?: string
+}
 export interface SchemaLabel {
   label: string
   properties: SchemaProperty[]
@@ -19,6 +25,11 @@ export interface SchemaLabel {
    * traversal from a bound anchor. Absent on an older appliance, which readers treat as true.
    */
   anchor?: boolean
+  /**
+   * The declared definition of the type this label names, verbatim from the realm's own registry —
+   * for an editor to show on hover. Absent for core/introspected labels, which declare none.
+   */
+  description?: string
 }
 export interface SchemaRelationship { from: string; type: string; to: string; count?: number }
 export interface GraphSchema {
