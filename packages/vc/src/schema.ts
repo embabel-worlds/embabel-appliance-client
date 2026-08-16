@@ -30,6 +30,8 @@ export interface SchemaLabel {
    * for an editor to show on hover. Absent for core/introspected labels, which declare none.
    */
   description?: string
+  /** The realm that declared this label's type. Absent means core — the world's own or the host's. */
+  realm?: string
 }
 export interface SchemaRelationship { from: string; type: string; to: string; count?: number }
 export interface GraphSchema {
